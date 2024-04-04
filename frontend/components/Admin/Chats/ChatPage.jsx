@@ -100,7 +100,7 @@ export default function ChatPage() {
         })
         inputRefs.current[index].classList.add('bg-blue-400')
         chatPersonId.current = persons[index].split('/')[1]
-        setChatIndex(index)
+        setChatIndex(index + 1)
         setChats([])
         setIsPersonActive(false)
     }
@@ -212,7 +212,7 @@ export default function ChatPage() {
                     <div className="sm:w-2/3 sm:h-[30rem] overflow-auto w-full pl-4 sm:border-l border-gray-300">
                         <div className="flex flex-col items-center justify-center">
                             {
-                                chatIndex || chatIndex === 0 ? (
+                                chatIndex ? (
                                     <>
                                         <div className="flex flex-col w-full">
                                             {
