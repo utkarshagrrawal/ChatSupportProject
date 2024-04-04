@@ -77,7 +77,7 @@ export default function ChatWindow(props) {
             method: 'PUT',
             headers: {
                 'Content-Type': 'application/json',
-                'Authorization': localStorage.getItem('token')
+                'Authorization': localStorage.getItem('userId')
             }
         }
 
