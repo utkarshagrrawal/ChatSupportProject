@@ -30,7 +30,8 @@ export default function ChatPage() {
                 return;
             }
 
-            setChats(data.success)
+            setIsPersonActive(data.success[1].is_active)
+            setChats(data.success[0])
         }
 
         if (!sendingMessage && isChatting) {
@@ -56,10 +57,8 @@ export default function ChatPage() {
                 return;
             }
 
-            let tempPersons = data.success[0]
+            let tempPersons = data.success
             tempPersons = [... new Set(tempPersons.map(person => person.sender_name + '/' + person.sender))]
-
-            setIsPersonActive(data.success[1].is_active)
 
             setPersons(tempPersons)
         }
