@@ -2,10 +2,10 @@ require('dotenv').config();
 const jwt = require('jsonwebtoken');
 
 const authenticated = async (req, res, next) => {
-    const token = req.headers.Authorization;
+    const token = req.headers.authorization;
     if (token) {
         try {
-            const payload = jwt.verify(signature, process.env.SECRET_KEY);
+            const payload = jwt.verify(token, process.env.SECRET_KEY);
             next();
         } catch (error) {
             return res.json({ error: error.message });
