@@ -7,11 +7,11 @@ export default function ChatPage() {
     const chatPersonId = useRef(null)
     const [persons, setPersons] = useState([])
     const [isPersonActive, setIsPersonActive] = useState(false)
-    const [isChatting, setIsChatting] = useState(false)
     const [sendingMessage, setSendingMessage] = useState(false)
     const [isActive, setIsActive] = useState(false)
     const [chats, setChats] = useState([])
     const [message, setMessage] = useState('')
+    const [chatIndex, setChatIndex] = useState(null)
 
     useEffect(() => {
         const fetchChats = async () => {
@@ -34,10 +34,10 @@ export default function ChatPage() {
             setChats(data.success[0])
         }
 
-        if (!sendingMessage && isChatting) {
+        if (!sendingMessage && chatIndex) {
             fetchChats()
         }
-    }, [sendingMessage, isChatting])
+    }, [sendingMessage, chatIndex])
 
     useEffect(() => {
         const fetchPersons = async () => {
@@ -100,7 +100,9 @@ export default function ChatPage() {
         })
         inputRefs.current[index].classList.add('bg-blue-400')
         chatPersonId.current = persons[index].split('/')[1]
-        setIsChatting(true)
+        setChatIndex(index)
+        setChats([])
+        setIsPersonActive(false)
     }
 
     const handleActive = async () => {
@@ -210,7 +212,7 @@ export default function ChatPage() {
                     <div className="sm:w-2/3 sm:h-[30rem] overflow-auto w-full pl-4 sm:border-l border-gray-300">
                         <div className="flex flex-col items-center justify-center">
                             {
-                                isChatting ? (
+                                chatIndex || chatIndex === 0 ? (
                                     <>
                                         <div className="flex flex-col w-full">
                                             {
@@ -254,7 +256,7 @@ export default function ChatPage() {
                             }
                         </div>
                         {
-                            isChatting && isPersonActive && (
+                            chatIndex && isPersonActive && (
                                 <div className="flex sticky bottom-0 left-0 w-full bg-white pt-4 min-h-[3rem]">
                                     <input
                                         type="text"

@@ -1,12 +1,10 @@
-import React, { useEffect, useState } from "react";
+import React from "react";
 import { Link } from "react-router-dom";
 import ChatWindow from "../Chat/ChatWindow";
 import StartChat from "./StartChat";
 
 
 export default function LandingPage() {
-    const [name, setName] = useState('')
-
     return (
         <div className="bg-gradient-to-br from-blue-200 to-blue-400 h-screen flex items-center justify-center relative">
             {!localStorage.getItem('userId') && (
@@ -17,7 +15,7 @@ export default function LandingPage() {
                     </svg>
                 </Link>
             )}
-            {localStorage.getItem('userId') ? <ChatWindow name={name} /> : <StartChat name={name} setName={setName} />}
+            {localStorage.getItem('userId') ? <ChatWindow /> : <StartChat />}
         </div>
     )
 }

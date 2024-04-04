@@ -1,9 +1,9 @@
 import React, { useEffect, useState } from "react";
 
-
 export default function StartChat(props) {
     const [adminOnline, setAdminOnline] = useState(false)
     const [startingChat, setStartingChat] = useState(false)
+    const [name, setName] = useState('')
 
     useEffect(() => {
         const checkAdminStatus = async () => {
@@ -29,7 +29,7 @@ export default function StartChat(props) {
     }, [])
 
     const handleChange = (e) => {
-        props.setName(e.target.value)
+        setName(e.target.value)
     }
 
     const handleNotify = () => {
@@ -37,11 +37,11 @@ export default function StartChat(props) {
     }
 
     const handleStart = async () => {
-        if (props.name === '') {
+        if (name === '') {
             alert('Please enter your name')
             return;
         }
-        if (props.name.trim() === '') {
+        if (name.trim() === '') {
             alert('Please enter your name')
             return;
         }
@@ -54,7 +54,7 @@ export default function StartChat(props) {
                 'Content-Type': 'application/json'
             },
             body: JSON.stringify({
-                name: props.name
+                name: name
             })
         }
 
@@ -69,6 +69,8 @@ export default function StartChat(props) {
         }
 
         localStorage.setItem('userId', data.userId)
+
+        location.reload();
     }
 
     return (

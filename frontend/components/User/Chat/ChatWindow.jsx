@@ -1,12 +1,9 @@
 import React, { useEffect, useState } from "react";
-import { useNavigate } from "react-router-dom";
 
-export default function ChatWindow(props) {
+export default function ChatWindow() {
     const [sending, setSending] = useState(false)
     const [message, setMessage] = useState('')
     const [chats, setChats] = useState([])
-
-    const navigate = useNavigate();
 
     const handleChange = (e) => {
         setMessage(e.target.value)
@@ -91,7 +88,7 @@ export default function ChatWindow(props) {
 
         localStorage.removeItem('userId')
 
-        navigate('/');
+        location.reload();
     }
 
     return (

@@ -35,7 +35,7 @@ const sendMessageLogic = async (body, params) => {
         .insert({ sender: params.id, reciever: process.env.ADMIN_ID, message: body.message, reciever_name: 'admin', sender_name: data[0].name })
 
     if (sendError) {
-        return { error: error.message }
+        return { error: sendError.message }
     }
     return { success: 'Message sent' }
 }
