@@ -6,7 +6,7 @@ const authenticated = async (req, res, next) => {
     if (token) {
         try {
             const payload = jwt.verify(token, process.env.SECRET_KEY);
-            next();
+            return next();
         } catch (error) {
             return res.json({ error: error.message });
         }

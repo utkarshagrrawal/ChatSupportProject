@@ -47,7 +47,7 @@ export default function ChatPage() {
                 }
             }
 
-            const response = await fetch('https://chat-support-project-backend.vercel.app/admin/persons', options)
+            const response = await fetch('http://localhost:3000/admin/persons', options)
             const data = await response.json()
 
             if (data.error) {
