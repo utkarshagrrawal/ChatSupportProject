@@ -21,9 +21,7 @@ export default function ChatPage() {
                 }
             }
 
-            console.log('fetching chats', chatPersonId.current)
-
-            const response = await fetch('http://localhost:3000/admin/fetch-chats/' + chatPersonId.current, options)
+            const response = await fetch('https://chat-support-project-backend.vercel.app/admin/fetch-chats/' + chatPersonId.current, options)
             const data = await response.json()
 
             if (data.error) {
@@ -35,7 +33,6 @@ export default function ChatPage() {
         }
 
         if (!sendingMessage && isChatting) {
-            console.log('fetching chats')
             fetchChats()
         }
     }, [sendingMessage, isChatting])
@@ -45,11 +42,12 @@ export default function ChatPage() {
             const options = {
                 method: 'GET',
                 headers: {
-                    'Content-Type': 'application/json'
+                    'Content-Type': 'application/json',
+                    'Authorization': localStorage.getItem('token')
                 }
             }
 
-            const response = await fetch('http://localhost:3000/admin/persons', options)
+            const response = await fetch('https://chat-support-project-backend.vercel.app/admin/persons', options)
             const data = await response.json()
 
             if (data.error) {
@@ -75,7 +73,7 @@ export default function ChatPage() {
                 }
             }
 
-            const response = await fetch('http://localhost:3000/admin/is-active', options)
+            const response = await fetch('https://chat-support-project-backend.vercel.app/admin/is-active', options)
             const data = await response.json()
 
             if (data.error) {
@@ -89,22 +87,8 @@ export default function ChatPage() {
         checkAdminStatus()
     }, [])
 
-    const handleLogout = async () => {
-        const options = {
-            method: 'POST',
-            headers: {
-                'Content-Type': 'application/json'
-            }
-        }
-
-        const response = await fetch('http://localhost:3000/admin/signout', options)
-        const data = await response.json()
-
-        if (data.error) {
-            alert(data.error)
-            return;
-        }
-
+    const handleLogout = () => {
+        localStorage.removeItem('token')
         navigate('/admin/signin')
     }
 
@@ -121,11 +105,12 @@ export default function ChatPage() {
         const options = {
             method: 'POST',
             headers: {
-                'Content-Type': 'application/json'
+                'Content-Type': 'application/json',
+                'Authorization': localStorage.getItem('token')
             }
         }
 
-        const response = await fetch('http://localhost:3000/admin/reverse-activeness', options)
+        const response = await fetch('https://chat-support-project-backend.vercel.app/admin/reverse-activeness', options)
         const data = await response.json()
 
         if (data.error) {
@@ -162,17 +147,16 @@ export default function ChatPage() {
             })
         }
 
-        const response = await fetch('http://localhost:3000/admin/send-message/' + chatPersonId.current, options)
+        const response = await fetch('https://chat-support-project-backend.vercel.app/admin/send-message/' + chatPersonId.current, options)
         const data = await response.json()
 
         if (data.error) {
             alert(data.error)
             return;
         }
+        setMessage('')
 
         setSendingMessage(false)
-
-        setMessage('')
     }
 
 
@@ -226,7 +210,6 @@ export default function ChatPage() {
                             {
                                 isChatting ? (
                                     <>
-                                        {console.log(chats)}
                                         <div className="flex flex-col w-full">
                                             {
                                                 chats.length > 0 ? chats.map((chat, index) => {

@@ -1,4 +1,5 @@
 const { supabase } = require("../utilities/databaseUtility")
+const jwt = require('jsonwebtoken')
 require('dotenv').config()
 
 
@@ -7,10 +8,14 @@ const loginLogic = async (body) => {
         email: body.email,
         password: body.password
     })
+
     if (error) {
         return { error: error.message }
     }
-    return { success: data }
+
+    const token = jwt.sign({ email: body.email }, process.env.SECRET_KEY, { expiresIn: '1d' })
+
+    return { success: token }
 }
 
 const fetchPersonsLogic = async () => {
@@ -98,14 +103,8 @@ const sendMessageLogic = async (params, body) => {
 }
 
 const fetchChatsLogic = async (params) => {
-    console.log('yeah')
-
     const { data, error } = await supabase
         .rpc('get_messages_by_id', { params_id: params.id })
-
-    console.log('sdfsdfs')
-
-    console.log(data, error)
 
     if (error) {
         return { error: error.message }
