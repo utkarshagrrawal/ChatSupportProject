@@ -40,9 +40,21 @@ const sendMessageLogic = async (body, params) => {
     return { success: 'Message sent' }
 }
 
+const endChatLogic = async (headers) => {
+    const { error } = await supabase
+        .from('users')
+        .update({ is_active: false })
+        .eq('id', headers.authorization)
+
+    if (error) {
+        return { error: error.message }
+    }
+    return { success: 'Chat ended' }
+}
 
 module.exports = {
     startChatLogic,
     fetchChatsLogic,
-    sendMessageLogic
+    sendMessageLogic,
+    endChatLogic
 }

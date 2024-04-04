@@ -72,8 +72,25 @@ export default function ChatWindow(props) {
         setMessage('')
     }
 
-    const handleEndChat = () => {
+    const handleEndChat = async () => {
+        const options = {
+            method: 'PUT',
+            headers: {
+                'Content-Type': 'application/json',
+                'Authorization': localStorage.getItem('token')
+            }
+        }
+
+        const response = await fetch('https://chat-support-project-backend.vercel.app/user/end-chat', options)
+        const data = await response.json()
+
+        if (data.error) {
+            alert(data.error)
+            return;
+        }
+
         localStorage.removeItem('userId')
+
         navigate('/');
     }
 

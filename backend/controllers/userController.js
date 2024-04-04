@@ -1,4 +1,4 @@
-const { fetchChatsLogic, sendMessageLogic } = require("../logic/userLogic");
+const { fetchChatsLogic, sendMessageLogic, endChatLogic } = require("../logic/userLogic");
 const { startChatLogic } = require("../logic/userLogic");
 
 const startChat = async (req, res) => {
@@ -25,8 +25,17 @@ const sendMessage = async (req, res) => {
     return res.json({ success: response.success })
 }
 
+const endChat = async (req, res) => {
+    const response = await endChatLogic(req.headers);
+    if (response.error) {
+        return res.json({ error: response.error })
+    }
+    return res.json({ success: response.success })
+}
+
 module.exports = {
     startChat,
     fetchChats,
-    sendMessage
+    sendMessage,
+    endChat
 }
