@@ -4,10 +4,41 @@ import { useNavigate } from "react-router-dom";
 export default function ChatPage() {
     const navigate = useNavigate()
     const inputRefs = useRef([]);
+    const chatPersonId = useRef(null)
     const [persons, setPersons] = useState([])
     const [isChatting, setIsChatting] = useState(false)
+    const [sendingMessage, setSendingMessage] = useState(false)
     const [isActive, setIsActive] = useState(false)
     const [chats, setChats] = useState([])
+    const [message, setMessage] = useState('')
+
+    useEffect(() => {
+        const fetchChats = async () => {
+            const options = {
+                method: 'GET',
+                headers: {
+                    'Content-Type': 'application/json'
+                }
+            }
+
+            console.log('fetching chats', chatPersonId.current)
+
+            const response = await fetch('http://localhost:3000/admin/fetch-chats/' + chatPersonId.current, options)
+            const data = await response.json()
+
+            if (data.error) {
+                alert(data.error)
+                return;
+            }
+
+            setChats(data.success)
+        }
+
+        if (!sendingMessage && isChatting) {
+            console.log('fetching chats')
+            fetchChats()
+        }
+    }, [sendingMessage, isChatting])
 
     useEffect(() => {
         const fetchPersons = async () => {
@@ -82,6 +113,7 @@ export default function ChatPage() {
             input.classList.remove('bg-blue-400')
         })
         inputRefs.current[index].classList.add('bg-blue-400')
+        chatPersonId.current = persons[index].split('/')[1]
         setIsChatting(true)
     }
 
@@ -104,6 +136,45 @@ export default function ChatPage() {
         setIsActive(!isActive)
     }
 
+    const handleChange = (e) => {
+        setMessage(e.target.value)
+    }
+
+    const handleSend = async () => {
+        if (message === '') {
+            alert('Please type a message')
+            return;
+        }
+        if (message.trim() === '') {
+            alert('Please type a message')
+            return;
+        }
+
+        setSendingMessage(true)
+
+        const options = {
+            method: 'POST',
+            headers: {
+                'Content-Type': 'application/json'
+            },
+            body: JSON.stringify({
+                message: message.trim()
+            })
+        }
+
+        const response = await fetch('http://localhost:3000/admin/send-message/' + chatPersonId.current, options)
+        const data = await response.json()
+
+        if (data.error) {
+            alert(data.error)
+            return;
+        }
+
+        setSendingMessage(false)
+
+        setMessage('')
+    }
+
 
     return (
         <div className="bg-gradient-to-br from-blue-200 to-blue-400 h-screen flex w-full items-center justify-center relative">
@@ -121,7 +192,7 @@ export default function ChatPage() {
                     {isActive ? 'Set inactive' : 'Set active'}
                 </button>
             </div>
-            <div className="bg-white p-8 rounded-lg shadow-lg w-3/4 h-3/4 overflow-scroll">
+            <div className="bg-white p-8 rounded-lg shadow-lg w-3/4 h-3/4">
                 <h1 className="text-3xl font-bold text-center mb-8">Chats</h1>
                 <div className="flex flex-col sm:flex-row">
                     {/* Left part: List of chat persons */}
@@ -150,84 +221,71 @@ export default function ChatPage() {
                         </div>
                     </div>
                     {/* Right part: Chat messages */}
-                    <div className="sm:w-2/3 w-full pl-4 sm:border-l border-gray-300">
-                        <div className="h-full overflow-scroll flex items-center justify-center">
+                    <div className="sm:w-2/3 sm:h-[30rem] overflow-auto w-full pl-4 sm:border-l border-gray-300">
+                        <div className="flex flex-col items-center justify-center">
                             {
                                 isChatting ? (
-                                    <div className="flex flex-col w-full">
-                                        <div className="flex items-center mb-4">
-                                            <img
-                                                src="https://via.placeholder.com/40"
-                                                alt="Profile"
-                                                className="rounded-full h-8 w-8 mr-2 border border-blue-400"
-                                            />
-                                            <p className="text-sm font-semibold">John Doe</p>
+                                    <>
+                                        {console.log(chats)}
+                                        <div className="flex flex-col w-full">
+                                            {
+                                                chats.length > 0 ? chats.map((chat, index) => {
+                                                    return (
+                                                        <div key={index}>
+                                                            <div className={`flex items-center gap-2 mb-4 ${chat.sender_name === 'admin' ? 'justify-end' : 'justify-start'}`}>
+                                                                <img
+                                                                    src={`https://ui-avatars.com/api/?name=${chat.sender_name === 'admin' ? 'Admin' : chat.sender_name}&background=random`}
+                                                                    alt="avatar"
+                                                                    className="w-8 h-8 rounded-full"
+                                                                />
+                                                                <p className="text-sm font-semibold">{chat.sender_name === 'admin' ? 'Admin' : chat.sender_name}</p>
+                                                            </div>
+                                                            <div className={`p-4 rounded-lg ${chat.sender_name === 'admin' ? 'bg-blue-500 text-white self-end' : 'bg-gray-200 text-black self-start'} mb-4`}>
+                                                                {chat.message}
+                                                            </div>
+                                                        </div>
+                                                    )
+                                                }) : (
+                                                    <div className="animate-pulse w-full h-32">
+                                                        <div className={`flex items-center gap-2 mb-4`}>
+                                                            <img
+                                                                src={`https://ui-avatars.com/api/?name=&background=e5e7eb`}
+                                                                alt="avatar"
+                                                                className="w-8 h-8 rounded-full"
+                                                            />
+                                                            <p className="text-sm font-semibold h-4 bg-gray-200 rounded-lg w-1/3"></p>
+                                                        </div>
+                                                        <div className={`p-4 rounded-lg mb-4 h-10 bg-gray-200 rounded-lg`}>
+                                                        </div>
+                                                    </div>
+                                                )
+                                            }
                                         </div>
-                                        <div className="bg-gray-100 p-4 rounded-lg mb-4">
-                                            <p className="text-sm">Hello, how can I help you?</p>
-                                        </div>
-                                        <div className="flex items-center mb-4 flex-row-reverse">
-                                            <img
-                                                src="https://via.placeholder.com/40"
-                                                alt="Profile"
-                                                className="rounded-full h-8 w-8 ml-2 border border-blue-400"
-                                            />
-                                            <p className="text-sm font-semibold">Jane Smith</p>
-                                        </div>
-                                        <div className="bg-gray-100 p-4 rounded-lg mb-4">
-                                            <p className="text-sm">I have a problem with my account</p>
-                                        </div>
-                                        <div className="flex items-center mb-4">
-                                            <img
-                                                src="https://via.placeholder.com/40"
-                                                alt="Profile"
-                                                className="rounded-full h-8 w-8 mr-2 border border-blue-400"
-                                            />
-                                            <p className="text-sm font-semibold">John Doe</p>
-                                        </div>
-                                        <div className="bg-gray-100 p-4 rounded-lg mb-4">
-                                            <p className="text-sm">Sure, what seems to be the problem?</p>
-                                        </div>
-                                        <div className="flex items-center mb-4 flex-row-reverse">
-                                            <img
-                                                src="https://via.placeholder.com/40"
-                                                alt="Profile"
-                                                className="rounded-full h-8 w-8 ml-2 border border-blue-400"
-                                            />
-                                            <p className="text-sm font-semibold">Jane Smith</p>
-                                        </div>
-                                        <div className="bg-gray-100 p-4 rounded-lg mb-4">
-                                            <p className="text-sm">I can't login to my account</p>
-                                        </div>
-                                        <div className="flex items-center mb-4">
-                                            <img
-                                                src="https://via.placeholder.com/40"
-                                                alt="Profile"
-                                                className="rounded-full h-8 w-8 mr-2 border border-blue-400"
-                                            />
-                                            <p className="text-sm font-semibold">John Doe</p>
-                                        </div>
-                                        <div className="bg-gray-100 p-4 rounded-lg mb-4">
-                                            <p className="text-sm">I can help you with that, please provide your email address</p>
-                                        </div>
-                                        <div className="flex items-center mb-4 flex-row-reverse">
-                                            <img
-                                                src="https://via.placeholder.com/40"
-                                                alt="Profile"
-                                                className="rounded-full h-8 w-8 ml-2 border border-blue-400"
-                                            />
-                                            <p className="text-sm font-semibold">Jane Smith</p>
-                                        </div>
-                                        <div className="bg-gray-100 p-4 rounded-lg mb-4">
-                                            <p className="text-sm">My email is  </p>
-                                        </div>
-                                    </div>
+                                    </>
                                 )
                                     : (
                                         <p className="text-gray-500">Select a chat to start messaging</p>
                                     )
                             }
                         </div>
+                        {
+                            isChatting && (
+                                <div className="flex sticky bottom-0 left-0 w-full bg-white pt-4 min-h-[3rem]">
+                                    <input
+                                        type="text"
+                                        id="message"
+                                        onChange={handleChange}
+                                        className="w-full rounded-lg border-gray-300 border p-2"
+                                        placeholder="Type a message..."
+                                    />
+                                    <button className="bg-blue-500 text-white px-4 py-2 rounded-lg ml-2" onClick={handleSend}>
+                                        {sendingMessage ? (
+                                            <div className="border-gray-300 h-5 w-5 animate-spin rounded-full border-2 border-white border-t-blue-600" />
+                                        ) : ('Send')}
+                                    </button>
+                                </div>
+                            )
+                        }
                     </div>
                 </div>
             </div>

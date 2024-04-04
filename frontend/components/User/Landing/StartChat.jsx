@@ -68,9 +68,7 @@ export default function StartChat(props) {
             return;
         }
 
-        props.setUserId(data.userId)
-
-        props.setIsChatting(true)
+        localStorage.setItem('userId', data.userId)
     }
 
     return (

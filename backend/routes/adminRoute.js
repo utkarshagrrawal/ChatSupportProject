@@ -1,5 +1,5 @@
 const express = require('express');
-const { login, fetchPersons, logout, isActive, reverseActiveness } = require('../controllers/adminController');
+const { login, fetchPersons, logout, isActive, reverseActiveness, sendMessage, fetchChats } = require('../controllers/adminController');
 const { authenticated } = require('../middlewares/authentication');
 
 const router = express.Router();
@@ -13,5 +13,9 @@ router.post('/signin', login)
 router.post('/signout', logout)
 
 router.get('/persons', authenticated, fetchPersons)
+
+router.post('/send-message/:id', sendMessage)
+
+router.get('/fetch-chats/:id', fetchChats)
 
 module.exports = router;

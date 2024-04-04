@@ -16,9 +16,7 @@ const startChatLogic = async (body) => {
 
 const fetchChatsLogic = async (params) => {
     const { data, error } = await supabase
-        .from('messages')
-        .select('*')
-        .or(`sender.eq.${params.id}`, `receiver.eq.${params.id}`);
+        .rpc('get_messages_by_id', { params_id: params.id })
 
     if (error) {
         return { error: error.message }
@@ -27,11 +25,16 @@ const fetchChatsLogic = async (params) => {
 }
 
 const sendMessageLogic = async (body, params) => {
-    const { error } = await supabase
-        .from('messages')
-        .insert({ sender: params.id, reciever: process.env.ADMIN_ID, message: body.message, reciever_name: 'admin', sender_name: body.name })
+    const { data, error } = await supabase
+        .from('users')
+        .select('')
+        .eq('id', params.id)
 
-    if (error) {
+    const { error: sendError } = await supabase
+        .from('messages')
+        .insert({ sender: params.id, reciever: process.env.ADMIN_ID, message: body.message, reciever_name: 'admin', sender_name: data[0].name })
+
+    if (sendError) {
         return { error: error.message }
     }
     return { success: 'Message sent' }

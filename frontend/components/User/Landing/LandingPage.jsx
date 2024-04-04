@@ -6,8 +6,6 @@ import StartChat from "./StartChat";
 
 export default function LandingPage() {
     const [name, setName] = useState('')
-    const [userId, setUserId] = useState('')
-    const [isChatting, setIsChatting] = useState(false)
 
     return (
         <div className="bg-gradient-to-br from-blue-200 to-blue-400 h-screen flex items-center justify-center relative">
@@ -17,7 +15,7 @@ export default function LandingPage() {
                     <path strokeLinecap="round" strokeLinejoin="round" d="m4.5 19.5 15-15m0 0H8.25m11.25 0v11.25" />
                 </svg>
             </Link>
-            {isChatting ? <ChatWindow name={name} userId={userId} /> : <StartChat name={name} setName={setName} setIsChatting={setIsChatting} setUserId={setUserId} />}
+            {localStorage.getItem('userId') ? <ChatWindow name={name} /> : <StartChat name={name} setName={setName} />}
         </div>
     )
 }

@@ -1,4 +1,5 @@
 const { supabase } = require("../utilities/databaseUtility")
+require('dotenv').config()
 
 
 const loginLogic = async (body) => {
@@ -76,10 +77,49 @@ const reverseActivenessLogic = async () => {
 
 }
 
+const sendMessageLogic = async (params, body) => {
+    const { data, error } = await supabase
+        .from('users')
+        .select('')
+        .eq('id', params.id)
+
+    if (error) {
+        return { error: error.message }
+    }
+
+    const { error: messageError } = await supabase
+        .from('messages')
+        .insert({ reciever: params.id, sender: process.env.ADMIN_ID, sender_name: 'admin', reciever_name: data[0].name, message: body.message })
+
+    if (messageError) {
+        return { error: messageError.message }
+    }
+    return { success: 'Message sent' }
+}
+
+const fetchChatsLogic = async (params) => {
+    console.log('yeah')
+
+    const { data, error } = await supabase
+        .rpc('get_messages_by_id', { params_id: params.id })
+
+    console.log('sdfsdfs')
+
+    console.log(data, error)
+
+    if (error) {
+        return { error: error.message }
+    }
+    return { success: data }
+
+}
+
 module.exports = {
     loginLogic,
     fetchPersonsLogic,
     logoutLogic,
     isActiveLogic,
-    reverseActivenessLogic
+    reverseActivenessLogic,
+    sendMessageLogic,
+    fetchChatsLogic
 }

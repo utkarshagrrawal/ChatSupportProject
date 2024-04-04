@@ -21,7 +21,7 @@ export default function ChatWindow(props) {
                 }
             }
 
-            const response = await fetch('http://localhost:3000/user/fetch-chats/' + props.userId, options)
+            const response = await fetch('http://localhost:3000/user/fetch-chats/' + localStorage.getItem('userId'), options)
             const data = await response.json()
 
             if (data.error) {
@@ -55,12 +55,11 @@ export default function ChatWindow(props) {
                 'Content-Type': 'application/json'
             },
             body: JSON.stringify({
-                name: props.name,
                 message: message.trim()
             })
         }
 
-        const response = await fetch('http://localhost:3000/user/send-message/' + props.userId, options)
+        const response = await fetch('http://localhost:3000/user/send-message/' + localStorage.getItem('userId'), options)
         const data = await response.json()
 
         setSending(false)
@@ -69,14 +68,17 @@ export default function ChatWindow(props) {
             alert(data.error)
             return;
         }
+
+        setMessage('')
     }
 
     const handleEndChat = () => {
+        localStorage.removeItem('userId')
         navigate('/');
     }
 
     return (
-        <div className="bg-white p-8 rounded-lg shadow-lg w-full sm:max-w-3xl max-h-96 flex flex-col">
+        <div className="bg-white p-8 rounded-lg shadow-lg w-full sm:max-w-3xl max-h-[40rem] flex flex-col">
             <div className="flex items-center justify-between mb-8">
                 <h1 className="text-3xl font-bold text-center">Chat with Admin</h1>
                 <button
@@ -91,11 +93,11 @@ export default function ChatWindow(props) {
                     <div key={index}>
                         <div className={`flex items-center gap-2 mb-4 ${chat.sender_name === 'admin' ? 'justify-end' : 'justify-start'}`}>
                             <img
-                                src={`https://ui-avatars.com/api/?name=${chat.sender_name === 'admin' ? 'Admin' : props.name}&background=random`}
+                                src={`https://ui-avatars.com/api/?name=${chat.sender_name === 'admin' ? 'Admin' : chat.sender_name}&background=random`}
                                 alt="avatar"
                                 className="w-8 h-8 rounded-full"
                             />
-                            <p className="text-sm font-semibold">{chat.sender_name === 'admin' ? 'Admin' : props.name}</p>
+                            <p className="text-sm font-semibold">{chat.sender_name === 'admin' ? 'Admin' : chat.sender_name}</p>
                         </div>
                         <div className={`p-4 rounded-lg ${chat.sender_name === 'admin' ? 'bg-blue-500 text-white self-end' : 'bg-gray-200 text-black self-start'} mb-4`}>
                             {chat.message}
@@ -103,7 +105,7 @@ export default function ChatWindow(props) {
                     </div>
                 ))}
             </div >
-            <div className="flex items-center border rounded-lg border-gray-300 overflow-hidden self-bottom">
+            <div className="flex items-center border rounded-lg border-gray-300 overflow-hidden sticky bottom-0 min-h-[3rem]">
                 <input type="text" className="w-full py-3 px-4 border-none focus:outline-none" placeholder="Type a message..." onChange={handleChange} id="message" />
                 <button className="bg-blue-500 text-white px-6 py-3" onClick={handleSend}>
                     {sending ? (

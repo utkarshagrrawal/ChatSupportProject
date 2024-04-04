@@ -1,4 +1,4 @@
-const { loginLogic, fetchPersonsLogic, logoutLogic, isActiveLogic, reverseActivenessLogic } = require("../logic/adminLogic")
+const { loginLogic, fetchPersonsLogic, logoutLogic, isActiveLogic, reverseActivenessLogic, sendMessageLogic, fetchChatsLogic } = require("../logic/adminLogic")
 
 const login = async (req, res) => {
     const response = await loginLogic(req.body);
@@ -40,10 +40,28 @@ const reverseActiveness = async (req, res) => {
     return res.json({ success: response.success })
 }
 
+const sendMessage = async (req, res) => {
+    const response = await sendMessageLogic(req.params, req.body);
+    if (response.error) {
+        return res.json({ error: response.error })
+    }
+    return res.json({ success: response.success })
+}
+
+const fetchChats = async (req, res) => {
+    const response = await fetchChatsLogic(req.params);
+    if (response.error) {
+        return res.json({ error: response.error })
+    }
+    return res.json({ success: response.success })
+}
+
 module.exports = {
     login,
     fetchPersons,
     logout,
     isActive,
-    reverseActiveness
+    reverseActiveness,
+    sendMessage,
+    fetchChats
 }
