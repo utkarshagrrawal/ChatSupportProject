@@ -109,7 +109,17 @@ const fetchChatsLogic = async (params) => {
     if (error) {
         return { error: error.message }
     }
-    return { success: data }
+
+    const { data: userData, error: userError } = await supabase
+        .from('users')
+        .select('')
+        .eq('id', params.id)
+
+    if (userError) {
+        return { error: userError.message }
+    }
+
+    return { success: [data, userData[0]] }
 
 }
 

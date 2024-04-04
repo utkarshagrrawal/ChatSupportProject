@@ -4,7 +4,7 @@ require('dotenv').config();
 const startChatLogic = async (body) => {
     const { data, error } = await supabase
         .from('users')
-        .insert({ name: body.name })
+        .insert({ name: body.name, is_active: true })
         .select('')
 
     if (error) {

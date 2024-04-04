@@ -6,6 +6,7 @@ export default function ChatPage() {
     const inputRefs = useRef([]);
     const chatPersonId = useRef(null)
     const [persons, setPersons] = useState([])
+    const [isPersonActive, setIsPersonActive] = useState(false)
     const [isChatting, setIsChatting] = useState(false)
     const [sendingMessage, setSendingMessage] = useState(false)
     const [isActive, setIsActive] = useState(false)
@@ -55,8 +56,10 @@ export default function ChatPage() {
                 return;
             }
 
-            let tempPersons = data.success
+            let tempPersons = data.success[0]
             tempPersons = [... new Set(tempPersons.map(person => person.sender_name + '/' + person.sender))]
+
+            setIsPersonActive(data.success[1].is_active)
 
             setPersons(tempPersons)
         }
@@ -195,7 +198,7 @@ export default function ChatPage() {
                                                 />
                                                 <div>
                                                     <p className="text-sm font-semibold">{person.split('/')[0]}</p>
-                                                    <p className="text-xs text-gray-500"><span className="font-semibold">ID:</span> {person.split('/')[1]}</p>
+                                                    <p className="text-xs text-slate-500"><span className="font-semibold">ID:</span> {person.split('/')[1]}</p>
                                                 </div>
                                             </div>
                                         )
@@ -252,7 +255,7 @@ export default function ChatPage() {
                             }
                         </div>
                         {
-                            isChatting && (
+                            isChatting && isPersonActive && (
                                 <div className="flex sticky bottom-0 left-0 w-full bg-white pt-4 min-h-[3rem]">
                                     <input
                                         type="text"
