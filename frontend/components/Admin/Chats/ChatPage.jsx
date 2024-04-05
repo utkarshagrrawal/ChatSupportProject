@@ -1,7 +1,9 @@
 import React, { useEffect, useRef, useState } from "react";
 import { useNavigate } from "react-router-dom";
+import socketIO from 'socket.io-client';
 
 export default function ChatPage() {
+    const socket = useRef('');
     const navigate = useNavigate()
     const inputRefs = useRef([]);
     const chatPersonId = useRef(null)
@@ -13,56 +15,76 @@ export default function ChatPage() {
     const [message, setMessage] = useState('')
     const [chatIndex, setChatIndex] = useState(null)
 
-    useEffect(() => {
-        const fetchChats = async () => {
-            const options = {
-                method: 'GET',
-                headers: {
-                    'Content-Type': 'application/json'
-                }
+    const fetchPersons = async () => {
+        const options = {
+            method: 'GET',
+            headers: {
+                'Content-Type': 'application/json',
+                'Authorization': localStorage.getItem('token')
             }
-
-            const response = await fetch('https://chat-support-project-backend.vercel.app/admin/fetch-chats/' + chatPersonId.current, options)
-            const data = await response.json()
-
-            if (data.error) {
-                alert(data.error)
-                return;
-            }
-
-            setIsPersonActive(data.success[1].is_active)
-            setChats(data.success[0])
         }
 
+        const response = await fetch('https://chat-support-project-backend.vercel.app/admin/persons', options)
+        const data = await response.json()
+
+        if (data.error) {
+            navigate('/admin/signin')
+            return;
+        }
+
+        let tempPersons = data.success
+        tempPersons = [... new Set(tempPersons.map(person => person.sender_name + '/' + person.sender))]
+
+        setPersons(tempPersons)
+    }
+
+    const fetchChats = async () => {
+        const options = {
+            method: 'GET',
+            headers: {
+                'Content-Type': 'application/json'
+            }
+        }
+
+        const response = await fetch('https://chat-support-project-backend.vercel.app/admin/fetch-chats/' + chatPersonId.current, options)
+        const data = await response.json()
+
+        if (data.error) {
+            alert(data.error)
+            return;
+        }
+
+        setIsPersonActive(data.success[1].is_active)
+        setChats(data.success[0])
+    }
+
+    useEffect(() => {
+        socket.current = socketIO.connect('http://localhost:3000');
+        socket.current.on("refresh_admin", () => {
+            console.log('refresh_admin')
+            fetchPersons();
+        })
+        socket.current.on("disconnect_user", () => {
+            console.log('disconnect_user')
+            fetchChats();
+        })
+    }, [chats])
+
+    useEffect(() => {
         if (!sendingMessage && chatIndex) {
             fetchChats()
         }
     }, [sendingMessage, chatIndex])
 
     useEffect(() => {
-        const fetchPersons = async () => {
-            const options = {
-                method: 'GET',
-                headers: {
-                    'Content-Type': 'application/json',
-                    'Authorization': localStorage.getItem('token')
-                }
-            }
-
-            const response = await fetch('https://chat-support-project-backend.vercel.app/admin/persons', options)
-            const data = await response.json()
-
-            if (data.error) {
-                navigate('/admin/signin')
-                return;
-            }
-
-            let tempPersons = data.success
-            tempPersons = [... new Set(tempPersons.map(person => person.sender_name + '/' + person.sender))]
-
-            setPersons(tempPersons)
+        if (chatIndex) {
+            socket.current.on('receive_message', () => {
+                fetchChats();
+            })
         }
+    }, [chatIndex])
 
+    useEffect(() => {
         fetchPersons();
     }, [])
 
@@ -105,6 +127,7 @@ export default function ChatPage() {
         inputRefs.current[index].classList.add('bg-blue-400')
         inputRefs.current[index].classList.remove('hover:bg-blue-100')
         chatPersonId.current = persons[index].split('/')[1]
+        socket.current.emit('join_room', { roomId: chatPersonId.current })
         setChats([])
         setChatIndex(index + 1)
         setIsPersonActive(false)
@@ -159,10 +182,13 @@ export default function ChatPage() {
         const response = await fetch('https://chat-support-project-backend.vercel.app/admin/send-message/' + chatPersonId.current, options)
         const data = await response.json()
 
+        socket.current.emit('send_message', { roomId: chatPersonId.current })
+
         if (data.error) {
             alert(data.error)
             return;
         }
+
         setMessage('')
 
         setSendingMessage(false)

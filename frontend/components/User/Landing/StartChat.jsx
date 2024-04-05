@@ -1,9 +1,11 @@
-import React, { useEffect, useState } from "react";
+import React, { useEffect, useRef, useState } from "react";
+import socketIO from "socket.io-client";
 
 export default function StartChat(props) {
     const [adminOnline, setAdminOnline] = useState(false)
     const [startingChat, setStartingChat] = useState(false)
     const [name, setName] = useState('')
+    const socket = useRef(null)
 
     useEffect(() => {
         const checkAdminStatus = async () => {
@@ -67,6 +69,9 @@ export default function StartChat(props) {
             alert(data.error)
             return;
         }
+
+        socket.current = socketIO("http://localhost:3000")
+        socket.current.emit("start_chat", { roomId: data.userId })
 
         localStorage.setItem('userId', data.userId)
 
