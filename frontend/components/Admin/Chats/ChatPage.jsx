@@ -95,13 +95,18 @@ export default function ChatPage() {
     }
 
     const handleChat = async (index) => {
+        if (index === chatIndex - 1) {
+            return;
+        }
         inputRefs.current.forEach((input) => {
             input.classList.remove('bg-blue-400')
+            input.classList.add('hover:bg-blue-100')
         })
         inputRefs.current[index].classList.add('bg-blue-400')
+        inputRefs.current[index].classList.remove('hover:bg-blue-100')
         chatPersonId.current = persons[index].split('/')[1]
-        setChatIndex(index + 1)
         setChats([])
+        setChatIndex(index + 1)
         setIsPersonActive(false)
     }
 
@@ -191,7 +196,7 @@ export default function ChatPage() {
                                 persons.length > 0 && (
                                     persons.map((person, index) => (
                                         person.split('/')[0] !== 'admin' && (
-                                            <div key={index} className="flex items-center mb-4 py-2 px-1 rounded-lg hover:bg-blue-100 duration-50" onClick={() => handleChat(index)} ref={(input) => inputRefs.current[index] = input}>
+                                            <div key={index} className="flex items-center mb-4 py-2 px-1 rounded-lg cursor-pointer duration-50 hover:bg-blue-100" onClick={() => handleChat(index)} ref={(input) => inputRefs.current[index] = input}>
                                                 <img
                                                     src={`https://ui-avatars.com/api/?name=${person.split('/')[0]}&background=random`}
                                                     alt="Profile"
@@ -199,7 +204,7 @@ export default function ChatPage() {
                                                 />
                                                 <div>
                                                     <p className="text-sm font-semibold">{person.split('/')[0]}</p>
-                                                    <p className="text-xs text-slate-500"><span className="font-semibold">ID:</span> {person.split('/')[1]}</p>
+                                                    <p className="text-xs text-blue-900"><span className="font-semibold">ID:</span> {person.split('/')[1]}</p>
                                                 </div>
                                             </div>
                                         )
