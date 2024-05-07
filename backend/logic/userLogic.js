@@ -49,6 +49,16 @@ const endChatLogic = async (headers) => {
     if (error) {
         return { error: error.message }
     }
+
+    const { error: subscriptionDeletionError } = await supabase
+        .from('subscriptions')
+        .delete()
+        .eq('id', headers.authorization)
+
+    if (subscriptionDeletionError) {
+        return { error: subscriptionDeletionError.message }
+    }
+
     return { success: 'Chat ended' }
 }
 

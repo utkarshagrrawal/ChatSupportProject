@@ -15,7 +15,7 @@ export default function ChatWindow() {
             }
         }
 
-        const response = await fetch('https://chat-support-project-backend.vercel.app/user/fetch-chats/' + localStorage.getItem('userId'), options)
+        const response = await fetch('http://localhost:3000/user/fetch-chats/' + localStorage.getItem('userId'), options)
         const data = await response.json()
 
         if (data.error) {
@@ -66,7 +66,7 @@ export default function ChatWindow() {
             })
         }
 
-        const response = await fetch('https://chat-support-project-backend.vercel.app/user/send-message/' + localStorage.getItem('userId'), options)
+        const response = await fetch('http://localhost:3000/user/send-message/' + localStorage.getItem('userId'), options)
         const data = await response.json()
 
         socket.current.emit("send_message", { roomId: localStorage.getItem('userId') })
@@ -90,7 +90,7 @@ export default function ChatWindow() {
             }
         }
 
-        const response = await fetch('https://chat-support-project-backend.vercel.app/user/end-chat', options)
+        const response = await fetch('http://localhost:3000/user/end-chat', options)
         const data = await response.json()
 
         if (data.error) {

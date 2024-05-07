@@ -24,7 +24,7 @@ export default function ChatPage() {
             }
         }
 
-        const response = await fetch('https://chat-support-project-backend.vercel.app/admin/persons', options)
+        const response = await fetch('http://localhost:3000/admin/persons', options)
         const data = await response.json()
 
         if (data.error) {
@@ -46,7 +46,7 @@ export default function ChatPage() {
             }
         }
 
-        const response = await fetch('https://chat-support-project-backend.vercel.app/admin/fetch-chats/' + chatPersonId.current, options)
+        const response = await fetch('http://localhost:3000/admin/fetch-chats/' + chatPersonId.current, options)
         const data = await response.json()
 
         if (data.error) {
@@ -97,15 +97,15 @@ export default function ChatPage() {
                 }
             }
 
-            const response = await fetch('https://chat-support-project-backend.vercel.app/admin/is-active', options)
+            const response = await fetch('http://localhost:3000/admin/is-active', options)
             const data = await response.json()
 
             if (data.error) {
                 setIsActive(false)
                 return;
+            } else{
+                setIsActive(data.success === 'Active' ? true : false)
             }
-
-            setIsActive(true)
         }
 
         checkAdminStatus()
@@ -142,7 +142,7 @@ export default function ChatPage() {
             }
         }
 
-        const response = await fetch('https://chat-support-project-backend.vercel.app/admin/reverse-activeness', options)
+        const response = await fetch('http://localhost:3000/admin/reverse-activeness', options)
         const data = await response.json()
 
         if (data.error) {
@@ -179,7 +179,7 @@ export default function ChatPage() {
             })
         }
 
-        const response = await fetch('https://chat-support-project-backend.vercel.app/admin/send-message/' + chatPersonId.current, options)
+        const response = await fetch('http://localhost:3000/admin/send-message/' + chatPersonId.current, options)
         const data = await response.json()
 
         socket.current.emit('send_message', { roomId: chatPersonId.current })

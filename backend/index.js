@@ -5,6 +5,7 @@ const { Server } = require("socket.io");
 
 const adminRoute = require('./routes/adminRoute')
 const userRoute = require('./routes/userRoute')
+const notificationRoute = require('./routes/notificationRoute')
 
 
 const app = express();
@@ -26,7 +27,7 @@ io.on("connection", (socket) => {
 
     socket.on("disconnect_chat", data => {
         socket.emit("disconnect_user", data)
-        socket.leave(data.roomId)
+        // socket.leave(data.roomId)
     })
 
     socket.on("start_chat", (data) => {
@@ -42,6 +43,8 @@ io.on("connection", (socket) => {
         socket.to(data.roomId).emit("receive_message");
     });
 });
+
+app.use('/notification', notificationRoute)
 
 app.use('/admin', adminRoute)
 
