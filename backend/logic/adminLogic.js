@@ -1,6 +1,13 @@
 const { supabase } = require("../utilities/databaseUtility")
+const webpush = require('web-push')
 const jwt = require('jsonwebtoken')
 require('dotenv').config()
+
+webpush.setVapidDetails(
+    'mailto:utkarshagrawal09jan@gmail.com',
+    process.env.PUBLIC_KEY,
+    process.env.PRIVATE_KEY
+)
 
 
 const loginLogic = async (body) => {
@@ -39,47 +46,54 @@ const logoutLogic = async () => {
 
 const isActiveLogic = async () => {
     const { data, error } = await supabase
-        .from('admin_active')
+        .from('users')
         .select('')
-        .eq('is_active', true)
+        .eq('id', process.env.ADMIN_ID)
 
     if (error) {
         return { error: error.message }
     }
-    if (data.length > 0) {
-        return { success: 'Active' }
-    }
-    return { error: 'Inactive' }
+    return { success: data[0].is_active ? 'Active' : 'Inactive' }
 }
 
 const reverseActivenessLogic = async () => {
     const { data, error } = await supabase
-        .from('admin_active')
+        .from('users')
         .select('')
-        .eq('is_active', true)
+        .eq('id', process.env.ADMIN_ID)
 
     if (error) {
         return { error: error.message }
     }
-    if (data.length > 0) {
-        const { error } = await supabase
-            .from('admin_active')
-            .update({ is_active: false })
-            .eq('is_active', true)
+
+    if (!data[0].is_active) {
+        const { data, error } = await supabase
+            .from('subscriptions')
+            .select('')
+
         if (error) {
             return { error: error.message }
         }
-        return { success: 'Deactivated' }
+
+        data.forEach(async (subscription) => {
+            try {
+                await webpush.sendNotification(JSON.parse(subscription.subscription), JSON.stringify({ title: 'Chat support', body: 'Admin is online now' }))
+            } catch (err) {
+                console.log(err)
+                return { error: 'Failed to send notification' }
+            }
+        })
     }
 
-    const { error: activationError } = await supabase
-        .from('admin_active')
-        .insert({ is_active: true })
-    if (activationError) {
-        return { error: activationError.message }
-    }
-    return { success: 'Activated' }
+    const { error: updateError } = await supabase
+        .from('users')
+        .update({ is_active: !data[0].is_active })
+        .eq('id', process.env.ADMIN_ID)
 
+    if (updateError) {
+        return { error: updateError.message }
+    }
+    return { success: 'Activeness reversed' }
 }
 
 const sendMessageLogic = async (params, body) => {
@@ -130,5 +144,5 @@ module.exports = {
     isActiveLogic,
     reverseActivenessLogic,
     sendMessageLogic,
-    fetchChatsLogic
+    fetchChatsLogic,
 }

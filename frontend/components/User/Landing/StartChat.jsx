@@ -1,4 +1,5 @@
-import React, { useEffect, useState } from "react";
+import React, { useEffect, useRef, useState } from "react";
+import socketIO from "socket.io-client";
 
 export default function StartChat(props) {
     const [adminOnline, setAdminOnline] = useState(false)
@@ -20,9 +21,9 @@ export default function StartChat(props) {
             if (data.error) {
                 setAdminOnline(false)
                 return;
+            } else {
+                setAdminOnline(data.success === 'Active' ? true : false)
             }
-
-            setAdminOnline(true)
         }
 
         checkAdminStatus()
@@ -32,8 +33,45 @@ export default function StartChat(props) {
         setName(e.target.value)
     }
 
-    const handleNotify = () => {
-        alert('You will be notified when the admin is online')
+    const registerNW = async () => {
+        const registeration = await navigator.serviceWorker.register('../notificationWorker.js')
+        return registeration;
+    }
+
+    const requestNotificationPermission = async () => {
+        const permission = await Notification.requestPermission()
+        if (permission !== 'granted') {
+            return { error: 'Permission not granted' }
+        }
+        return { success: 'Permission granted' }
+    }
+
+    const handleNotify = async () => {
+        let registeration = null;
+        if (!("serviceWorker" in navigator)) {
+            return { error: 'Service worker not supported' }
+        }
+        if (!("Notification" in window)) {
+            return { error: 'Notification not supported' }
+        }
+        try {
+            registeration = await registerNW();
+            console.log(registeration)
+        } catch (err) {
+            console.log(err)
+            alert('Service worker registeration failed')
+        }
+        try {
+            const permission = await requestNotificationPermission()
+            if (permission.error) {
+                console.log(permission.error)
+                alert('Permission not granted')
+                return;
+            }
+        } catch (err) {
+            console.log(err)
+            alert('Permission not granted')
+        }
     }
 
     const handleStart = async () => {
@@ -69,6 +107,7 @@ export default function StartChat(props) {
         }
 
         localStorage.setItem('userId', data.userId)
+        localStorage.setItem('userName', name)
 
         location.reload();
     }

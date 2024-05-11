@@ -1,34 +1,46 @@
-import React, { useEffect, useState } from "react";
+import React, { useEffect, useRef, useState } from "react";
+import socketIO from "socket.io-client";
 
 export default function ChatWindow() {
     const [sending, setSending] = useState(false)
     const [message, setMessage] = useState('')
     const [chats, setChats] = useState([])
+    const socket = useRef(null)
+
+    const fetchChats = async () => {
+        const options = {
+            method: 'GET',
+            headers: {
+                'Content-Type': 'application/json'
+            }
+        }
+
+        const response = await fetch('https://chat-support-project-backend.vercel.app/user/fetch-chats/' + localStorage.getItem('userId'), options)
+        const data = await response.json()
+
+        if (data.error) {
+            alert(data.error)
+            return;
+        }
+
+        setChats(data.success)
+    }
 
     const handleChange = (e) => {
         setMessage(e.target.value)
     }
 
     useEffect(() => {
-        const fetchChats = async () => {
-            const options = {
-                method: 'GET',
-                headers: {
-                    'Content-Type': 'application/json'
-                }
-            }
+        socket.current = socketIO("https://chat-support-project-backend.vercel.app")
+        socket.current.emit("join_room", { roomId: localStorage.getItem('userId') })
+        socket.current.on("receive_message", (data) => {
+            console.log(data)
+            fetchChats()
+            // setChats(prev => [...prev, { message: data.message, sender_name: data.sender_name }])
+        })
+    }, [])
 
-            const response = await fetch('https://chat-support-project-backend.vercel.app/user/fetch-chats/' + localStorage.getItem('userId'), options)
-            const data = await response.json()
-
-            if (data.error) {
-                alert(data.error)
-                return;
-            }
-
-            setChats(data.success)
-        }
-
+    useEffect(() => {
         if (!sending) {
             fetchChats()
         }
@@ -59,6 +71,8 @@ export default function ChatWindow() {
         const response = await fetch('https://chat-support-project-backend.vercel.app/user/send-message/' + localStorage.getItem('userId'), options)
         const data = await response.json()
 
+        socket.current.emit("send_message", { roomId: localStorage.getItem('userId'), message: message.trim(), sender_name: 'user', firstTime: chats.length === 1 })
+
         setSending(false)
 
         if (data.error) {
@@ -86,7 +100,16 @@ export default function ChatWindow() {
             return;
         }
 
+        socket.current.emit("disconnect_chat", { roomId: localStorage.getItem('userId') })
+
         localStorage.removeItem('userId')
+
+        let notificationRegistrations = await navigator.serviceWorker.getRegistrations()
+        notificationRegistrations.forEach(registration => {
+            if (registration.active.scriptURL === "https://chat-support-project.vercel.app/notificationWorker.js") {
+                registration.unregister()
+            }
+        })
 
         location.reload();
     }

@@ -1,19 +1,53 @@
 const express = require('express')
 const cors = require('cors')
+const http = require("http");
+const { Server } = require("socket.io");
 
 const adminRoute = require('./routes/adminRoute')
 const userRoute = require('./routes/userRoute')
+const notificationRoute = require('./routes/notificationRoute')
+
 
 const app = express();
 
 app.use(express.json());
 app.use(cors());
 
+const server = http.createServer(app);
+
+const io = new Server(server, {
+    cors: {
+        origin: "https://chat-support-project.vercel.app",
+        methods: ["GET", "POST"],
+    },
+});
+
+io.on("connection", (socket) => {
+    console.log(`User Connected: ${socket.id}`);
+
+    socket.on("disconnect_chat", data => {
+        socket.leave(data.roomId)
+        socket.to(data.roomId).emit("disconnect_user")
+        // socket.to(data.roomId).emit("refresh_admin")
+    })
+
+    socket.on("join_room", (data) => socket.join(data.roomId));
+
+    socket.on("send_message", (data) => {
+        socket.join(data.roomId);
+        socket.to(data.roomId).emit("receive_message", { message: data.message, sender_name: data.sender_name, firstTime: data.firstTime });
+        if (data.firstTime) {
+            socket.emit("refresh_admin")
+        }
+    });
+});
+
+app.use('/notification', notificationRoute)
+
 app.use('/admin', adminRoute)
 
 app.use('/user', userRoute)
 
-
-app.listen(3000, () => {
-    console.log('Server is running on port 3000');
-})
+server.listen(3000, () => {
+    console.log("SERVER IS RUNNING 3000");
+});

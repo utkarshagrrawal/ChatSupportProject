@@ -1,4 +1,4 @@
-const { loginLogic, fetchPersonsLogic, logoutLogic, isActiveLogic, reverseActivenessLogic, sendMessageLogic, fetchChatsLogic } = require("../logic/adminLogic")
+const { loginLogic, fetchPersonsLogic, logoutLogic, isActiveLogic, reverseActivenessLogic, sendMessageLogic, fetchChatsLogic, sendNotificationLogic } = require("../logic/adminLogic")
 
 const login = async (req, res) => {
     const response = await loginLogic(req.body);
@@ -63,5 +63,5 @@ module.exports = {
     isActive,
     reverseActiveness,
     sendMessage,
-    fetchChats
+    fetchChats,
 }
