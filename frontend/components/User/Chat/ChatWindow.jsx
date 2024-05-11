@@ -31,10 +31,9 @@ export default function ChatWindow() {
     }
 
     useEffect(() => {
-        socket.current = socketIO("")
+        socket.current = socketIO(import.meta.env.VITE_API_URL)
         socket.current.emit("join_room", { roomId: localStorage.getItem('userId') })
         socket.current.on("receive_message", (data) => {
-            console.log(data)
             fetchChats()
             // setChats(prev => [...prev, { message: data.message, sender_name: data.sender_name }])
         })
