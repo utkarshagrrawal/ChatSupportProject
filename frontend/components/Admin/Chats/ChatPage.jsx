@@ -59,7 +59,7 @@ export default function ChatPage() {
     }
 
     useEffect(() => {
-        socket.current = socketIO.connect('');
+        socket.current = socketIO.connect('https://chat-support-project-backend.vercel.app');
         socket.current.on("disconnect_user", () => {
             fetchChats();
             fetchPersons();
