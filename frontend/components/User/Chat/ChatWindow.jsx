@@ -137,7 +137,7 @@ export default function ChatWindow() {
                             />
                             <p className="text-sm font-semibold">{chat.sender_name === 'admin' ? 'Admin' : chat.sender_name}</p>
                         </div>
-                        <div className={`p-4 rounded-lg ${chat.sender_name === 'admin' ? 'bg-blue-500 text-white self-start' : 'bg-gray-200 text-black self-end'} mb-4`}>
+                        <div className={`p-4 rounded-lg ${chat.sender_name === 'admin' ? 'bg-blue-500 text-white text-start' : 'bg-gray-200 text-black text-end'} mb-4`}>
                             {chat.message}
                         </div>
                     </div>

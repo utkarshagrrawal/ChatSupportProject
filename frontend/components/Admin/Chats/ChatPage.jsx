@@ -59,7 +59,7 @@ export default function ChatPage() {
     }
 
     useEffect(() => {
-        socket.current = socketIO.connect('');
+        socket.current = socketIO.connect(import.meta.env.VITE_API_URL);
         socket.current.on("disconnect_user", () => {
             fetchChats();
             fetchPersons();
