@@ -27,7 +27,7 @@ export default function Login() {
             })
         }
 
-        const response = await fetch('https://chat-support-project-backend.vercel.app/admin/signin', options)
+        const response = await fetch(import.meta.env.API_URL + '/admin/signin', options)
         const data = await response.json()
 
         setLoggingIn(false)

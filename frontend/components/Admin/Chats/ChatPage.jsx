@@ -24,7 +24,7 @@ export default function ChatPage() {
             }
         }
 
-        const response = await fetch('https://chat-support-project-backend.vercel.app/admin/persons', options)
+        const response = await fetch(import.meta.env.API_URL + '/admin/persons', options)
         const data = await response.json()
 
         if (data.error) {
@@ -46,7 +46,7 @@ export default function ChatPage() {
             }
         }
 
-        const response = await fetch('https://chat-support-project-backend.vercel.app/admin/fetch-chats/' + chatPersonId.current, options)
+        const response = await fetch(import.meta.env.API_URL + '/admin/fetch-chats/' + chatPersonId.current, options)
         const data = await response.json()
 
         if (data.error) {
@@ -59,7 +59,7 @@ export default function ChatPage() {
     }
 
     useEffect(() => {
-        socket.current = socketIO.connect('https://chat-support-project-backend.vercel.app');
+        socket.current = socketIO.connect('');
         socket.current.on("disconnect_user", () => {
             fetchChats();
             fetchPersons();
@@ -89,7 +89,7 @@ export default function ChatPage() {
                 }
             }
 
-            const response = await fetch('https://chat-support-project-backend.vercel.app/admin/is-active', options)
+            const response = await fetch(import.meta.env.API_URL + '/admin/is-active', options)
             const data = await response.json()
 
             if (data.error) {
@@ -134,7 +134,7 @@ export default function ChatPage() {
             }
         }
 
-        const response = await fetch('https://chat-support-project-backend.vercel.app/admin/reverse-activeness', options)
+        const response = await fetch(import.meta.env.API_URL + '/admin/reverse-activeness', options)
         const data = await response.json()
 
         if (data.error) {
@@ -180,7 +180,7 @@ export default function ChatPage() {
             })
         }
 
-        const response = await fetch('https://chat-support-project-backend.vercel.app/admin/send-message/' + chatPersonId.current, options)
+        const response = await fetch(import.meta.env.API_URL + '/admin/send-message/' + chatPersonId.current, options)
         const data = await response.json()
 
         if (data.error) {
