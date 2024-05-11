@@ -6,8 +6,6 @@ export default function StartChat(props) {
     const [startingChat, setStartingChat] = useState(false)
     const [name, setName] = useState('')
 
-    console.log(import.meta.env.VITE_API_URL)
-
     useEffect(() => {
         const checkAdminStatus = async () => {
             const options = {
@@ -58,20 +56,16 @@ export default function StartChat(props) {
         }
         try {
             registeration = await registerNW();
-            console.log(registeration)
         } catch (err) {
-            console.log(err)
             alert('Service worker registeration failed')
         }
         try {
             const permission = await requestNotificationPermission()
             if (permission.error) {
-                console.log(permission.error)
                 alert('Permission not granted')
                 return;
             }
         } catch (err) {
-            console.log(err)
             alert('Permission not granted')
         }
     }
