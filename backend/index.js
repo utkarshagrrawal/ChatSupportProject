@@ -2,6 +2,7 @@ const express = require('express')
 const cors = require('cors')
 const http = require("http");
 const { Server } = require("socket.io");
+require('dotenv').config();
 
 const adminRoute = require('./routes/adminRoute')
 const userRoute = require('./routes/userRoute')
@@ -11,7 +12,11 @@ const notificationRoute = require('./routes/notificationRoute')
 const app = express();
 
 app.use(express.json());
-app.use(cors());
+app.use(cors({
+    origin:process.env.CLIENT_URL, 
+    credentials:true,            //access-control-allow-credentials:true
+    optionSuccessStatus:200
+}));
 
 const server = http.createServer(app);
 
