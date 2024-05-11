@@ -5,7 +5,6 @@ export default function StartChat(props) {
     const [adminOnline, setAdminOnline] = useState(false)
     const [startingChat, setStartingChat] = useState(false)
     const [name, setName] = useState('')
-    const socket = useRef(null)
 
     useEffect(() => {
         const checkAdminStatus = async () => {
@@ -16,7 +15,7 @@ export default function StartChat(props) {
                 }
             }
 
-            const response = await fetch('http://localhost:3000/admin/is-active', options)
+            const response = await fetch('https://chat-support-project-backend.vercel.app/admin/is-active', options)
             const data = await response.json()
 
             if (data.error) {
@@ -97,7 +96,7 @@ export default function StartChat(props) {
             })
         }
 
-        const response = await fetch('http://localhost:3000/user/start-chat', options)
+        const response = await fetch('https://chat-support-project-backend.vercel.app/user/start-chat', options)
         const data = await response.json()
 
         setStartingChat(false)
@@ -107,10 +106,8 @@ export default function StartChat(props) {
             return;
         }
 
-        socket.current = socketIO("http://localhost:3000")
-        socket.current.emit("start_chat", { roomId: data.userId })
-
         localStorage.setItem('userId', data.userId)
+        localStorage.setItem('userName', name)
 
         location.reload();
     }

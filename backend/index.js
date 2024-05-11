@@ -17,7 +17,7 @@ const server = http.createServer(app);
 
 const io = new Server(server, {
     cors: {
-        origin: "http://localhost:5173",
+        origin: "https://chat-support-project.vercel.app",
         methods: ["GET", "POST"],
     },
 });
@@ -26,21 +26,19 @@ io.on("connection", (socket) => {
     console.log(`User Connected: ${socket.id}`);
 
     socket.on("disconnect_chat", data => {
-        socket.emit("disconnect_user", data)
-        // socket.leave(data.roomId)
+        socket.leave(data.roomId)
+        socket.to(data.roomId).emit("disconnect_user")
+        // socket.to(data.roomId).emit("refresh_admin")
     })
 
-    socket.on("start_chat", (data) => {
-        socket.join(data.roomId)
-        socket.emit("refresh_admin")
-    })
-
-    socket.on("join_room", (data) => {
-        socket.join(data.roomId);
-    });
+    socket.on("join_room", (data) => socket.join(data.roomId));
 
     socket.on("send_message", (data) => {
-        socket.to(data.roomId).emit("receive_message");
+        socket.join(data.roomId);
+        socket.to(data.roomId).emit("receive_message", { message: data.message, sender_name: data.sender_name, firstTime: data.firstTime });
+        if (data.firstTime) {
+            socket.emit("refresh_admin")
+        }
     });
 });
 

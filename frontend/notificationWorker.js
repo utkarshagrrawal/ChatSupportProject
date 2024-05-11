@@ -15,7 +15,7 @@ const urlBase64ToUint8Array = base64String => {
 }
 
 self.addEventListener('activate', async (e) => {
-    const getPublicKey = await fetch('http://localhost:3000/notification/key', {
+    const getPublicKey = await fetch('https://chat-support-project-backend.vercel.app/notification/key', {
         method: 'GET',
         headers: {
             'Content-Type': 'application/json'
@@ -26,7 +26,7 @@ self.addEventListener('activate', async (e) => {
         userVisibleOnly: true,
         applicationServerKey: urlBase64ToUint8Array(publicKey.key)
     });
-    const response = await fetch('http://localhost:3000/notification/subscribe', {
+    const response = await fetch('https://chat-support-project-backend.vercel.app/notification/subscribe', {
         method: 'POST',
         body: JSON.stringify(subscription),
         headers: {

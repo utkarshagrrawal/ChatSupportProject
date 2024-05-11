@@ -24,7 +24,7 @@ export default function ChatPage() {
             }
         }
 
-        const response = await fetch('http://localhost:3000/admin/persons', options)
+        const response = await fetch('https://chat-support-project-backend.vercel.app/admin/persons', options)
         const data = await response.json()
 
         if (data.error) {
@@ -46,7 +46,7 @@ export default function ChatPage() {
             }
         }
 
-        const response = await fetch('http://localhost:3000/admin/fetch-chats/' + chatPersonId.current, options)
+        const response = await fetch('https://chat-support-project-backend.vercel.app/admin/fetch-chats/' + chatPersonId.current, options)
         const data = await response.json()
 
         if (data.error) {
@@ -59,30 +59,22 @@ export default function ChatPage() {
     }
 
     useEffect(() => {
-        socket.current = socketIO.connect('http://localhost:3000');
-        socket.current.on("refresh_admin", () => {
-            console.log('refresh_admin')
+        socket.current = socketIO.connect('https://chat-support-project-backend.vercel.app');
+        socket.current.on("disconnect_user", () => {
+            fetchChats();
             fetchPersons();
         })
-        socket.current.on("disconnect_user", () => {
-            console.log('disconnect_user')
-            fetchChats();
-        })
-    }, [chats])
+        socket.current.on("refresh_admin", () => fetchPersons());
+    }, [])
 
     useEffect(() => {
-        if (!sendingMessage && chatIndex) {
+        if (!sendingMessage && chatIndex)
             fetchChats()
-        }
     }, [sendingMessage, chatIndex])
 
     useEffect(() => {
-        if (chatIndex) {
-            socket.current.on('receive_message', () => {
-                fetchChats();
-            })
-        }
-    }, [chatIndex])
+        socket.current.on('receive_message', () => fetchChats())
+    }, [])
 
     useEffect(() => {
         fetchPersons();
@@ -97,13 +89,13 @@ export default function ChatPage() {
                 }
             }
 
-            const response = await fetch('http://localhost:3000/admin/is-active', options)
+            const response = await fetch('https://chat-support-project-backend.vercel.app/admin/is-active', options)
             const data = await response.json()
 
             if (data.error) {
                 setIsActive(false)
                 return;
-            } else{
+            } else {
                 setIsActive(data.success === 'Active' ? true : false)
             }
         }
@@ -142,12 +134,21 @@ export default function ChatPage() {
             }
         }
 
-        const response = await fetch('http://localhost:3000/admin/reverse-activeness', options)
+        const response = await fetch('https://chat-support-project-backend.vercel.app/admin/reverse-activeness', options)
         const data = await response.json()
 
         if (data.error) {
             alert(data.error)
             return;
+        }
+
+        if (isActive) {
+            let notificationRegistrations = await navigator.serviceWorker.getRegistrations();
+            notificationRegistrations.forEach(registration => {
+                if (registration.active.scriptURL.includes('notificationWorker.js')) {
+                    registration.unregister();
+                }
+            });
         }
 
         setIsActive(!isActive)
@@ -179,10 +180,8 @@ export default function ChatPage() {
             })
         }
 
-        const response = await fetch('http://localhost:3000/admin/send-message/' + chatPersonId.current, options)
+        const response = await fetch('https://chat-support-project-backend.vercel.app/admin/send-message/' + chatPersonId.current, options)
         const data = await response.json()
-
-        socket.current.emit('send_message', { roomId: chatPersonId.current })
 
         if (data.error) {
             alert(data.error)
@@ -190,8 +189,9 @@ export default function ChatPage() {
         }
 
         setMessage('')
-
         setSendingMessage(false)
+
+        socket.current.emit('send_message', { roomId: chatPersonId.current, message: message.trim(), sender_name: 'admin', firstTime: false })
     }
 
 
@@ -213,11 +213,11 @@ export default function ChatPage() {
             </div>
             <div className="bg-white p-8 rounded-lg shadow-lg w-3/4 h-3/4">
                 <h1 className="text-3xl font-bold text-center mb-8">Chats</h1>
-                <div className="flex flex-col sm:flex-row">
+                <div className="flex flex-col sm:flex-row gap-2">
                     {/* Left part: List of chat persons */}
-                    <div className="sm:w-1/3 w-full pr-4">
-                        <div className="pb-4 mb-4">
-                            <h2 className="text-lg font-bold mb-6">Chat Persons</h2>
+                    <div className="sm:w-1/3 w-full p-2 border rounded-lg">
+                        <h2 className="text-lg font-bold mb-6 sticky text-center">Chat Persons</h2>
+                        <div className="pb-4 mb-4 overflow-auto sm:h-[25rem] h-[10rem]">
                             {
                                 persons.length > 0 && (
                                     persons.map((person, index) => (
@@ -240,46 +240,44 @@ export default function ChatPage() {
                         </div>
                     </div>
                     {/* Right part: Chat messages */}
-                    <div className="sm:w-2/3 sm:h-[30rem] overflow-auto w-full pl-4 sm:border-l border-gray-300">
-                        <div className="flex flex-col items-center justify-center">
+                    <div className="sm:w-2/3 sm:h-[30rem] h-[10rem] overflow-auto w-full border rounded-lg border-gray-300">
+                        <div className="flex flex-col items-center justify-center p-2">
                             {
                                 chatIndex ? (
-                                    <>
-                                        <div className="flex flex-col w-full">
-                                            {
-                                                chats.length > 0 ? chats.map((chat, index) => {
-                                                    return (
-                                                        <div key={index}>
-                                                            <div className={`flex items-center gap-2 mb-4 ${chat.sender_name === 'admin' ? 'justify-end' : 'justify-start'}`}>
-                                                                <img
-                                                                    src={`https://ui-avatars.com/api/?name=${chat.sender_name === 'admin' ? 'Admin' : chat.sender_name}&background=random`}
-                                                                    alt="avatar"
-                                                                    className="w-8 h-8 rounded-full"
-                                                                />
-                                                                <p className="text-sm font-semibold">{chat.sender_name === 'admin' ? 'Admin' : chat.sender_name}</p>
-                                                            </div>
-                                                            <div className={`p-4 rounded-lg ${chat.sender_name === 'admin' ? 'bg-blue-500 text-white self-end' : 'bg-gray-200 text-black self-start'} mb-4`}>
-                                                                {chat.message}
-                                                            </div>
-                                                        </div>
-                                                    )
-                                                }) : (
-                                                    <div className="animate-pulse w-full h-32">
-                                                        <div className={`flex items-center gap-2 mb-4`}>
+                                    <div className="flex flex-col w-full">
+                                        {
+                                            chats.length > 0 ? chats.map((chat, index) => {
+                                                return (
+                                                    <div key={index}>
+                                                        <div className={`flex items-center gap-2 mb-4 ${chat.sender_name === 'admin' ? 'justify-end' : 'justify-start'}`}>
                                                             <img
-                                                                src={`https://ui-avatars.com/api/?name=&background=e5e7eb`}
+                                                                src={`https://ui-avatars.com/api/?name=${chat.sender_name === 'admin' ? 'Admin' : chat.sender_name}&background=random`}
                                                                 alt="avatar"
                                                                 className="w-8 h-8 rounded-full"
                                                             />
-                                                            <p className="text-sm font-semibold h-4 bg-gray-200 rounded-lg w-1/3"></p>
+                                                            <p className="text-sm font-semibold">{chat.sender_name === 'admin' ? 'Admin' : chat.sender_name}</p>
                                                         </div>
-                                                        <div className={`p-4 rounded-lg mb-4 h-10 bg-gray-200 rounded-lg`}>
+                                                        <div className={`p-4 rounded-lg ${chat.sender_name === 'admin' ? 'bg-blue-500 text-white self-end' : 'bg-gray-200 text-black self-start'} mb-4`}>
+                                                            {chat.message}
                                                         </div>
                                                     </div>
                                                 )
-                                            }
-                                        </div>
-                                    </>
+                                            }) : (
+                                                <div className="animate-pulse w-full h-32">
+                                                    <div className={`flex items-center gap-2 mb-4`}>
+                                                        <img
+                                                            src={`https://ui-avatars.com/api/?name=&background=e5e7eb`}
+                                                            alt="avatar"
+                                                            className="w-8 h-8 rounded-full"
+                                                        />
+                                                        <p className="text-sm font-semibold h-4 bg-gray-200 rounded-lg w-1/3"></p>
+                                                    </div>
+                                                    <div className={`p-4 rounded-lg mb-4 h-10 bg-gray-200 rounded-lg`}>
+                                                    </div>
+                                                </div>
+                                            )
+                                        }
+                                    </div>
                                 )
                                     : (
                                         <p className="text-gray-500">Select a chat to start messaging</p>
@@ -288,7 +286,7 @@ export default function ChatPage() {
                         </div>
                         {
                             chatIndex && isPersonActive && (
-                                <div className="flex sticky bottom-0 left-0 w-full bg-white pt-4 min-h-[3rem]">
+                                <div className="flex sticky bottom-0 left-0 w-full bg-white p-2 min-h-[3rem]">
                                     <input
                                         type="text"
                                         id="message"

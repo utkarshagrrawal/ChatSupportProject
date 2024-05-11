@@ -27,7 +27,7 @@ export default function Login() {
             })
         }
 
-        const response = await fetch('http://localhost:3000/admin/signin', options)
+        const response = await fetch('https://chat-support-project-backend.vercel.app/admin/signin', options)
         const data = await response.json()
 
         setLoggingIn(false)
