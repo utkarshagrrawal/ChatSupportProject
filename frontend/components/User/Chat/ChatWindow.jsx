@@ -15,7 +15,7 @@ export default function ChatWindow() {
             }
         }
 
-        const response = await fetch('https://chat-support-project-backend.vercel.app/user/fetch-chats/' + localStorage.getItem('userId'), options)
+        const response = await fetch(import.meta.env.API_URL + '/user/fetch-chats/' + localStorage.getItem('userId'), options)
         const data = await response.json()
 
         if (data.error) {
@@ -31,7 +31,7 @@ export default function ChatWindow() {
     }
 
     useEffect(() => {
-        socket.current = socketIO("https://chat-support-project-backend.vercel.app")
+        socket.current = socketIO("")
         socket.current.emit("join_room", { roomId: localStorage.getItem('userId') })
         socket.current.on("receive_message", (data) => {
             console.log(data)
@@ -68,7 +68,7 @@ export default function ChatWindow() {
             })
         }
 
-        const response = await fetch('https://chat-support-project-backend.vercel.app/user/send-message/' + localStorage.getItem('userId'), options)
+        const response = await fetch(import.meta.env.API_URL + '/user/send-message/' + localStorage.getItem('userId'), options)
         const data = await response.json()
 
         socket.current.emit("send_message", { roomId: localStorage.getItem('userId'), message: message.trim(), sender_name: 'user', firstTime: chats.length === 1 })
@@ -92,7 +92,7 @@ export default function ChatWindow() {
             }
         }
 
-        const response = await fetch('https://chat-support-project-backend.vercel.app/user/end-chat', options)
+        const response = await fetch(import.meta.env.API_URL + '/user/end-chat', options)
         const data = await response.json()
 
         if (data.error) {
@@ -105,8 +105,9 @@ export default function ChatWindow() {
         localStorage.removeItem('userId')
 
         let notificationRegistrations = await navigator.serviceWorker.getRegistrations()
+        let url = import.meta.env.API_URL + '/notificationWorker.js'
         notificationRegistrations.forEach(registration => {
-            if (registration.active.scriptURL === "https://chat-support-project.vercel.app/notificationWorker.js") {
+            if (registration.active.scriptURL === url) {
                 registration.unregister()
             }
         })
@@ -128,7 +129,7 @@ export default function ChatWindow() {
             <div className="overflow-y-auto">
                 {chats.map((chat, index) => (
                     <div key={index}>
-                        <div className={`flex items-center gap-2 mb-4 ${chat.sender_name === 'admin' ? 'justify-end' : 'justify-start'}`}>
+                        <div className={`flex items-center gap-2 mb-4 ${chat.sender_name === 'admin' ? 'justify-start' : 'justify-end'}`}>
                             <img
                                 src={`https://ui-avatars.com/api/?name=${chat.sender_name === 'admin' ? 'Admin' : chat.sender_name}&background=random`}
                                 alt="avatar"
@@ -136,7 +137,7 @@ export default function ChatWindow() {
                             />
                             <p className="text-sm font-semibold">{chat.sender_name === 'admin' ? 'Admin' : chat.sender_name}</p>
                         </div>
-                        <div className={`p-4 rounded-lg ${chat.sender_name === 'admin' ? 'bg-blue-500 text-white self-end' : 'bg-gray-200 text-black self-start'} mb-4`}>
+                        <div className={`p-4 rounded-lg ${chat.sender_name === 'admin' ? 'bg-blue-500 text-white self-start' : 'bg-gray-200 text-black self-end'} mb-4`}>
                             {chat.message}
                         </div>
                     </div>

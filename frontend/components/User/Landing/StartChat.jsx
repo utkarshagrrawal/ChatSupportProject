@@ -15,7 +15,7 @@ export default function StartChat(props) {
                 }
             }
 
-            const response = await fetch('https://chat-support-project-backend.vercel.app/admin/is-active', options)
+            const response = await fetch(import.meta.env.API_URL + '/admin/is-active', options)
             const data = await response.json()
 
             if (data.error) {
@@ -96,7 +96,7 @@ export default function StartChat(props) {
             })
         }
 
-        const response = await fetch('https://chat-support-project-backend.vercel.app/user/start-chat', options)
+        const response = await fetch(import.meta.env.API_URL + '/user/start-chat', options)
         const data = await response.json()
 
         setStartingChat(false)
