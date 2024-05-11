@@ -6,6 +6,8 @@ export default function StartChat(props) {
     const [startingChat, setStartingChat] = useState(false)
     const [name, setName] = useState('')
 
+    console.log(import.meta.env.VITE_API_URL)
+
     useEffect(() => {
         const checkAdminStatus = async () => {
             const options = {
@@ -15,7 +17,7 @@ export default function StartChat(props) {
                 }
             }
 
-            const response = await fetch(import.meta.env.API_URL + '/admin/is-active', options)
+            const response = await fetch(import.meta.env.VITE_API_URL + '/admin/is-active', options)
             const data = await response.json()
 
             if (data.error) {
@@ -96,7 +98,7 @@ export default function StartChat(props) {
             })
         }
 
-        const response = await fetch(import.meta.env.API_URL + '/user/start-chat', options)
+        const response = await fetch(import.meta.env.VITE_API_URL + '/user/start-chat', options)
         const data = await response.json()
 
         setStartingChat(false)

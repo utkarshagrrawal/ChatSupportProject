@@ -15,7 +15,7 @@ export default function ChatWindow() {
             }
         }
 
-        const response = await fetch(import.meta.env.API_URL + '/user/fetch-chats/' + localStorage.getItem('userId'), options)
+        const response = await fetch(import.meta.env.VITE_API_URL + '/user/fetch-chats/' + localStorage.getItem('userId'), options)
         const data = await response.json()
 
         if (data.error) {
@@ -68,7 +68,7 @@ export default function ChatWindow() {
             })
         }
 
-        const response = await fetch(import.meta.env.API_URL + '/user/send-message/' + localStorage.getItem('userId'), options)
+        const response = await fetch(import.meta.env.VITE_API_URL + '/user/send-message/' + localStorage.getItem('userId'), options)
         const data = await response.json()
 
         socket.current.emit("send_message", { roomId: localStorage.getItem('userId'), message: message.trim(), sender_name: 'user', firstTime: chats.length === 1 })
@@ -92,7 +92,7 @@ export default function ChatWindow() {
             }
         }
 
-        const response = await fetch(import.meta.env.API_URL + '/user/end-chat', options)
+        const response = await fetch(import.meta.env.VITE_API_URL + '/user/end-chat', options)
         const data = await response.json()
 
         if (data.error) {
@@ -105,7 +105,7 @@ export default function ChatWindow() {
         localStorage.removeItem('userId')
 
         let notificationRegistrations = await navigator.serviceWorker.getRegistrations()
-        let url = import.meta.env.API_URL + '/notificationWorker.js'
+        let url = import.meta.env.VITE_API_URL + '/notificationWorker.js'
         notificationRegistrations.forEach(registration => {
             if (registration.active.scriptURL === url) {
                 registration.unregister()
