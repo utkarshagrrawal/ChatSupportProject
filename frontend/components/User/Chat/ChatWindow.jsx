@@ -1,5 +1,5 @@
 import React, { useEffect, useRef, useState } from "react";
-import socketIO from "socket.io-client";
+import { io } from "socket.io-client";
 
 export default function ChatWindow() {
     const [sending, setSending] = useState(false)
@@ -26,17 +26,42 @@ export default function ChatWindow() {
         setChats(data.success)
     }
 
+    const handleBeforeUnload = async (e) => {
+        e.preventDefault();
+        e.returnValue = 'true';
+        return 'Are you sure you want to leave? You will be disconnected from the chat.'
+    }
+
+    const handleUnload = async (e) => {
+        await handleEdnChat();
+        return;
+    }
+
     const handleChange = (e) => {
         setMessage(e.target.value)
     }
 
     useEffect(() => {
-        socket.current = socketIO(import.meta.env.VITE_API_URL)
+        if (!localStorage.getItem('userName') || !localStorage.getItem('userId')) {
+            return;
+        }
+        socket.current = io(import.meta.env.VITE_API_URL)
+        socket.current.on("connect", () => {
+            console.log('Connected to server', socket.current.id)
+        });
         socket.current.emit("join_room", { roomId: localStorage.getItem('userId') })
         socket.current.on("receive_message", (data) => {
             fetchChats()
-            // setChats(prev => [...prev, { message: data.message, sender_name: data.sender_name }])
         })
+    }, [])
+
+    useEffect(() => {
+        window.addEventListener('beforeunload', handleBeforeUnload)
+        window.addEventListener('unload', handleUnload)
+        return () => {
+            window.removeEventListener('beforeunload', handleBeforeUnload)
+            window.removeEventListener('unload', handleUnload)
+        };
     }, [])
 
     useEffect(() => {
@@ -70,7 +95,7 @@ export default function ChatWindow() {
         const response = await fetch(import.meta.env.VITE_API_URL + '/user/send-message/' + localStorage.getItem('userId'), options)
         const data = await response.json()
 
-        socket.current.emit("send_message", { roomId: localStorage.getItem('userId'), message: message.trim(), sender_name: 'user', firstTime: chats.length === 1 })
+        socket.current.emit("send_message", { roomId: localStorage.getItem('userId'), message: message.trim(), sender_name: 'user', firstTime: chats.length === 0 ? true : false })
 
         setSending(false)
 
@@ -83,6 +108,8 @@ export default function ChatWindow() {
     }
 
     const handleEndChat = async () => {
+        window.removeEventListener('beforeunload', () => handleUnload)
+
         const options = {
             method: 'PUT',
             headers: {
@@ -102,6 +129,7 @@ export default function ChatWindow() {
         socket.current.emit("disconnect_chat", { roomId: localStorage.getItem('userId') })
 
         localStorage.removeItem('userId')
+        localStorage.removeItem('userName')
 
         let notificationRegistrations = await navigator.serviceWorker.getRegistrations()
         let url = import.meta.env.VITE_API_URL + '/notificationWorker.js'
