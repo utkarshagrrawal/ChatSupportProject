@@ -1,5 +1,4 @@
 import React, { useEffect, useRef, useState } from "react";
-import socketIO from "socket.io-client";
 
 export default function StartChat(props) {
     const [adminOnline, setAdminOnline] = useState(false)

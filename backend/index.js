@@ -29,17 +29,15 @@ io.on("connection", (socket) => {
 
     socket.on("disconnect_chat", data => {
         socket.leave(data.roomId)
-        socket.to(data.roomId).emit("disconnect_user")
-        // socket.to(data.roomId).emit("refresh_admin")
+        socket.broadcast.emit("disconnect_user")
     })
 
     socket.on("join_room", (data) => socket.join(data.roomId));
 
     socket.on("send_message", (data) => {
-        socket.join(data.roomId);
         socket.to(data.roomId).emit("receive_message", { message: data.message, sender_name: data.sender_name, firstTime: data.firstTime });
         if (data.firstTime) {
-            socket.emit("refresh_admin")
+            socket.broadcast.emit("refresh_admin")
         }
     });
 });
