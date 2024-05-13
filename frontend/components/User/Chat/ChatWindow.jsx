@@ -33,7 +33,7 @@ export default function ChatWindow() {
     }
 
     const handleUnload = async (e) => {
-        await handleEdnChat();
+        await handleEndChat();
         return;
     }
 
@@ -132,7 +132,8 @@ export default function ChatWindow() {
         localStorage.removeItem('userName')
 
         let notificationRegistrations = await navigator.serviceWorker.getRegistrations()
-        let url = import.meta.env.VITE_API_URL + '/notificationWorker.js'
+        const checkProdOrDevURLHost = location.href.includes('localhost') ? 'http://localhost:5173' : 'https://chat-support-project.vercel.app'
+        let url = checkProdOrDevURLHost + '/notificationWorker.js'
         notificationRegistrations.forEach(registration => {
             if (registration.active.scriptURL === url) {
                 registration.unregister()

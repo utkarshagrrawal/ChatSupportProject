@@ -48,15 +48,10 @@ export default function StartChat(props) {
     const handleNotify = async () => {
         let registeration = null;
         if (!("serviceWorker" in navigator)) {
-            return { error: 'Service worker not supported' }
+            alert('Error: Service worker not supported')
         }
         if (!("Notification" in window)) {
-            return { error: 'Notification not supported' }
-        }
-        try {
-            registeration = await registerNW();
-        } catch (err) {
-            alert('Service worker registeration failed')
+            alert('Error: Notification not supported')
         }
         try {
             const permission = await requestNotificationPermission()
@@ -66,6 +61,11 @@ export default function StartChat(props) {
             }
         } catch (err) {
             alert('Permission not granted')
+        }
+        try {
+            registeration = await registerNW();
+        } catch (err) {
+            alert('Service worker registeration failed')
         }
     }
 

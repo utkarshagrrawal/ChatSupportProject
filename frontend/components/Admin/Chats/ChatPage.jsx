@@ -147,15 +147,6 @@ export default function ChatPage() {
             return;
         }
 
-        if (isActive) {
-            let notificationRegistrations = await navigator.serviceWorker.getRegistrations();
-            notificationRegistrations.forEach(registration => {
-                if (registration.active.scriptURL.includes('notificationWorker.js')) {
-                    registration.unregister();
-                }
-            });
-        }
-
         setIsActive(!isActive)
     }
 
@@ -259,7 +250,7 @@ export default function ChatPage() {
                                                 />
                                                 <p className="text-sm font-semibold">{chat.sender_name === 'admin' ? 'Admin' : chat.sender_name}</p>
                                             </div>
-                                            <div className={`p-4 rounded-lg ${chat.sender_name === 'admin' ? 'bg-blue-500 text-white self-end' : 'bg-gray-200 text-black self-start'} mb-4`}>
+                                            <div className={`p-4 rounded-lg ${chat.sender_name === 'admin' ? 'bg-blue-500 text-white text-end' : 'bg-gray-200 text-black text-start'} mb-4`}>
                                                 {chat.message}
                                             </div>
                                         </div>
