@@ -15,7 +15,8 @@ const urlBase64ToUint8Array = base64String => {
 }
 
 self.addEventListener('activate', async (e) => {
-    const getPublicKey = await fetch(import.meta.env.VITE_API_URL + '/notification/key', {
+    const checkProdOrDevURLHost = location.href.includes('localhost') ? 'http://localhost:3000' : 'https://chat-support-project-backend.vercel.app'
+    const getPublicKey = await fetch(checkProdOrDevURLHost + '/notification/key', {
         method: 'GET',
         headers: {
             'Content-Type': 'application/json'
@@ -26,7 +27,7 @@ self.addEventListener('activate', async (e) => {
         userVisibleOnly: true,
         applicationServerKey: urlBase64ToUint8Array(publicKey.key)
     });
-    const response = await fetch(import.meta.env.VITE_API_URL + '/notification/subscribe', {
+    const response = await fetch(checkProdOrDevURLHost + '/notification/subscribe', {
         method: 'POST',
         body: JSON.stringify(subscription),
         headers: {
@@ -39,5 +40,5 @@ self.addEventListener('activate', async (e) => {
 })
 
 self.addEventListener('push', (e) => {
-    self.registration.showNotification("Chat support", { body: e.data.text().body })
+    self.registration.showNotification("Chat support", { body: e.data.json().body || "Admin is now active" })
 })

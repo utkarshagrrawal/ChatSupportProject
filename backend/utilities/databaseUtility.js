@@ -4,7 +4,7 @@ require('dotenv').config();
 
 const options = {
     db: {
-        schema: 'public'
+        schema: 'support'
     }
 }
 
