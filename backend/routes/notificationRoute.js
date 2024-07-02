@@ -1,10 +1,13 @@
-const express = require('express')
-const { subscribeNotification, getPublicKey } = require('../controllers/notificationController');
+const express = require("express");
+const {
+  subscribeNotification,
+  getPublicKey,
+} = require("../controllers/notificationController");
 
-const router = express.Router()
+const router = express.Router();
 
-router.post('/subscribe', subscribeNotification)
+router.post("/subscribe", subscribeNotification);
 
-router.get('/key', getPublicKey)
+router.get("/key", getPublicKey);
 
 module.exports = router;
