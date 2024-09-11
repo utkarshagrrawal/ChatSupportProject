@@ -34,13 +34,11 @@ io.on("connection", (socket) => {
   socket.on("join_room", (data) => socket.join(data.roomId));
 
   socket.on("send_message", (data) => {
-    socket
-      .to(data.roomId)
-      .emit("receive_message", {
-        message: data.message,
-        sender_name: data.sender_name,
-        firstTime: data.firstTime,
-      });
+    socket.to(data.roomId).emit("receive_message", {
+      message: data.message,
+      sender_name: data.sender_name,
+      firstTime: data.firstTime,
+    });
     if (data.firstTime) {
       socket.broadcast.emit("refresh_admin");
     }

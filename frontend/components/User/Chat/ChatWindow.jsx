@@ -78,8 +78,6 @@ export default function ChatWindow() {
   }, [sending]);
 
   const handleSend = async () => {
-    setSending(true);
-
     if (message === "") {
       alert("Please type a message");
       return;
@@ -88,6 +86,8 @@ export default function ChatWindow() {
       alert("Please type a message");
       return;
     }
+
+    setSending(true);
 
     const options = {
       method: "POST",
@@ -107,13 +107,7 @@ export default function ChatWindow() {
     );
     const data = await response.json();
 
-    socket.current.emit("send_message", {
-      roomId: localStorage.getItem("userId"),
-      message: message.trim(),
-      sender_name: "user",
-      firstTime: chats.length === 0 ? true : false,
-    });
-
+    setMessage("");
     setSending(false);
 
     if (data.error) {
@@ -121,7 +115,12 @@ export default function ChatWindow() {
       return;
     }
 
-    setMessage("");
+    socket.current.emit("send_message", {
+      roomId: localStorage.getItem("userId"),
+      message: message.trim(),
+      sender_name: "user",
+      firstTime: chats.length === 0 ? true : false,
+    });
   };
 
   const handleEndChat = async () => {

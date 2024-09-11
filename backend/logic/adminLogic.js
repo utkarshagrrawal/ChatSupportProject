@@ -27,7 +27,7 @@ const loginLogic = async (body) => {
 };
 
 const fetchPersonsLogic = async () => {
-  const { data, error } = await supabase.from("messages").select("");
+  const { data, error } = await supabase.from("users").select("");
 
   if (error) {
     return { error: error.message };
@@ -106,15 +106,13 @@ const sendMessageLogic = async (params, body) => {
     return { error: error.message };
   }
 
-  const { error: messageError } = await supabase
-    .from("messages")
-    .insert({
-      reciever: params.id,
-      sender: process.env.ADMIN_ID,
-      sender_name: "admin",
-      reciever_name: data[0].name,
-      message: body.message,
-    });
+  const { error: messageError } = await supabase.from("messages").insert({
+    reciever: params.id,
+    sender: process.env.ADMIN_ID,
+    sender_name: "admin",
+    reciever_name: data[0].name,
+    message: body.message,
+  });
 
   if (messageError) {
     return { error: messageError.message };

@@ -35,14 +35,11 @@ export default function ChatPage() {
       return;
     }
 
-    let tempPersons = data.success;
-    tempPersons = [
-      ...new Set(
-        tempPersons.map((person) => person.sender_name + "/" + person.sender)
-      ),
-    ];
-
-    setPersons(tempPersons);
+    setPersons(
+      data.success?.length > 0
+        ? data.success?.map((person) => person.name + "/" + person.id)
+        : []
+    );
   };
 
   const fetchChats = async () => {
